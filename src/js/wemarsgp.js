@@ -35,16 +35,30 @@
 let gamepadAPI = {
 	
 	pad: [], //gamepad objects
+	connected: [false, false]; //status of all gamepads
 	padCounter: 0, //number of gamepads 
 
-	//new controller created
-	addController: function(g){
-		gamepadAPI.pad[gamepadAPI.padCounter] = new WeMarsGamePad(g); 
+	//new controller connected
+	addController: function(evt){
+		gamepadAPI.pad[gamepadAPI.padCounter] = new WeMarsGamePad(evt.gamepad); 
 		console.log("Controller #" + (gamepadAPI.padCounter + 1) + " id: " + gamepadAPI.pad[gamepadAPI.padCounter].controller.id);
+		gamepadAPI.connected[gamepadAPI.padCounter].connected = true; 
 		gamepadAPI.padCounter++;
 	},
 
-	//TODO: add removeController
+	//new controller removed
+	removeController: function(evt){
+		//loop through gamepads
+		for(let i = 0; i < gamepadAPI.pad.length; i++){
+			gp = gamepadAPI.pad[i]
+			if(evt.gamepad.id === gp.id){
+				gamepadAPI.connected[i] = false;
+				gamepadAPI.pad.splice(i,1); //remove gamepad
+				gamepadAPI.padCounter--; 
+			}
+		}
+	},
+
 
 	updateBtn: function(n){
 		gamepadAPI.buttonsStatus = []; //empty cache
@@ -104,7 +118,6 @@ function WeMarsGamePad(g){
 	this.btnMap = 0; //status of all buttons
 	this.axisStatus = []; //status of all axes
 	this.id = g.id; //id of gamepad
-
-	this.axes = [];
+	this.axes = []; //axes positions
 
 }
