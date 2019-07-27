@@ -3,12 +3,12 @@
  Gamepad object for Mars Rover
  
  Kyle Inzunza
- July 26/2019
+ July 27/2019
 */
 
 
 /*
- XBOX layout
+ XBOX button layout
 
 0 A
 1 B
@@ -46,44 +46,65 @@ let gamepadAPI = {
 
 	//TODO: add removeController
 
-
-	//TODO: fix update function
-	//returns id of buttons that have changed status
 	updateBtn: function(n){
 		gamepadAPI.buttonsStatus = []; //empty cache
 
-		
+		let gp = gamepadAPI.pad[n];
 		let c = gamepadAPI.pad[n].controller; //for ease of reading
+		let changed = false; //if status has changed
 
-		let btnChange = []; //id of changed buttons
-		let k = 0; //counter
+		let map = 0; //current map of buttons
 
 		//loop through buttons
 		for(let i = 0; i < c.buttons.length; i++){
-			//if state is different
-			if(c.buttons[i].pressed !== gamepadAPI.pad[n].btnStatus[i]){
-				btnChange[k] = i; //add index to list
-				gamepadAPI.pad[n].btnStatus = !gamepadAPI.pad[n].btnStatus; //invert status
+			//if button i is pressed
+			if (c.buttons[i].pressed){
+				map |= (1 << i); //add status to map
 			}
 		}
 
-		return btnChange;
+		//if map has changed
+		if (gp.btnMap !== map){
+			changed = true;
+			gp.btnMap = map; //reset map
+		}
+
+		return changed;
 	},
 
+	updateAxes: function(n){
 
+		let gp = gamepadAPI.pad[n];
+		let c = gamepadAPI.pad[n].controller; //for ease of reading
+		let changed = false; //if axes position has changed
+
+		//loop through axes
+		for(let i = 0; i < c.axes.length; i++){
+			//if axis has changed
+			if (c.axes[i] != gp.axes[i]){
+				changed = true; 
+				gp.axes[i] = c.axes[i];
+			}
+		}
+
+		return changed;
+		
+	},
 	btnName: ["A","B","X","Y","LB","RB","LT","BACK","START","L AXIS","R AXIS","DPAD up", "DPAD down"]
 };
 
+//converts axis from float to integer
+function convertAxis(a){
+	return Math.trunc(a*1000);
+}
 
-//construtor
+//construtor for gamepad
 function WeMarsGamePad(g){
 	this.controller = g; //gamepad object
-	this.btnStatus = []; //status of all buttons
+	this.btnMap = 0; //status of all buttons
 	this.axisStatus = []; //status of all axes
 	this.id = g.id; //id of gamepad
 
-	for (let i = 0; i < g.buttons.length; i++){
-		this.btnStatus[i] = false; //assume buttons all unpressed at start
-	}
+	this.axes = [];
 
 }

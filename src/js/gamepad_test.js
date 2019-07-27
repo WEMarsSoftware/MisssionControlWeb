@@ -1,32 +1,37 @@
 let status = "OFF"; //status of gamepad
-let change; //index of buttons that have changed status
 let timerCounter = 0;
+let timer = 10
 
 
+let ipadress = "ws://192.168.43.5/ws";
+let ws = new WebSocket(ipadress);
 
 //when window is loaded
 window.addEventListener('load', function() {
 	console.log("Window loaded...");
+	document.getElementById("status").innerHTML = status;
 	
 	//start timer
 	window.setInterval(function(){
+		let id = "";
 		document.getElementById("status").innerHTML = status;
 
 		timerCounter++; //give program a chance to define gamepad before attempting to update
-		if (status === "ON" && timerCounter > 100){
-			change = gamepadAPI.updateBtn(0); //update gamepad 0
-			console.log(change);
-
-			//if the status has changed for any buttons
-			if(change){
-				let s = "";
-				for(let i = 0; i < change.length; i++){
-					s += gamepadAPI[change[i]] + " ";
+		if (status === "ON" && timerCounter > 50){
+			
+			//if controller has changed
+			if(gamepadAPI.updateBtn(0) || gamepadAPI.updateAxes(0)){
+				for (let i = 0; i < 4; i++){
+					id = "axis" + i
+					document.getElementById(id).innerHTML = (i+1) + ": " + gamepadAPI.pad[0].axes[i];
 				}
 			}
+
+
+			
 		}
 
-	}, 10);
+	}, timer);
 
 });
 
