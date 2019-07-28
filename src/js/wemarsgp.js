@@ -30,19 +30,18 @@
 
 */
 
-
-
 let gamepadAPI = {
 	
 	pad: [], //gamepad objects
-	connected: [false, false]; //status of all gamepads
+	connected: [], //status of all gamepads
 	padCounter: 0, //number of gamepads 
 
 	//new controller connected
 	addController: function(evt){
 		gamepadAPI.pad[gamepadAPI.padCounter] = new WeMarsGamePad(evt.gamepad); 
 		console.log("Controller #" + (gamepadAPI.padCounter + 1) + " id: " + gamepadAPI.pad[gamepadAPI.padCounter].controller.id);
-		gamepadAPI.connected[gamepadAPI.padCounter].connected = true; 
+		gamepadAPI.connected[gamepadAPI.padCounter] = true; 
+		console.log(gamepadAPI.connected[gamepadAPI.padCounter]);
 		gamepadAPI.padCounter++;
 	},
 
