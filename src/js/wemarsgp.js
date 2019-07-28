@@ -39,9 +39,8 @@ let gamepadAPI = {
 	//new controller connected
 	addController: function(evt){
 		gamepadAPI.pad[gamepadAPI.padCounter] = new WeMarsGamePad(evt.gamepad); 
-		console.log("Controller #" + (gamepadAPI.padCounter + 1) + " id: " + gamepadAPI.pad[gamepadAPI.padCounter].controller.id);
+		//alert("Controller #" + (gamepadAPI.padCounter + 1) + " id: " + gamepadAPI.pad[gamepadAPI.padCounter].controller.id);
 		gamepadAPI.connected[gamepadAPI.padCounter] = true; 
-		console.log(gamepadAPI.connected[gamepadAPI.padCounter]);
 		gamepadAPI.padCounter++;
 	},
 

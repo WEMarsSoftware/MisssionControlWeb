@@ -9,17 +9,18 @@ void setup() {
   digitalWrite(LED, HIGH); //led on for setup 
   Serial.begin(115200);
 
-  WebsocketESP.startWiFi();
-  WebsocketESP.startServer();
+  startWiFi();
+  startServer();
 
   timer = millis(); //start timer
 
 }
 
 void loop() {
-  if(millis() - timer > 1000){
+  if(millis() - timer > 750){
+    timer = millis(); //reset timer
 
-    Serial.println(WebsocketESP.controller1_data);
+    Serial.println(controller1_data);
 
     //blink LED
     if(LED_status){

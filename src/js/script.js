@@ -10,28 +10,11 @@ let gp; //holder for gamepad object
 let ws_status = false;
 
 let ipadress = "ws://192.168.1.3/ws";
-let ws = new WebSocket(ipadress); //start new websocket
+let ws;
 
 gamepadAPI.connected[0] = false;
 gamepadAPI.connected[1] = false;
 
-//when websocket opens
-ws.onopen = function() {
-	console.log = ("Connected");
-	ws_status = true;
-
-
-	//send message every second
-	window.setInterval(function(){
-		ws.send("Message >:(");
-	},1000)
-};
-
-//when websocket recieves message
-ws.onmessage = function(evt) {
-	message = String(evt.data);
-	alert(message);
-};
 
 //when window is loaded
 window.addEventListener('load', function() {
@@ -42,6 +25,8 @@ window.addEventListener('load', function() {
 		let id = "";
 
 		for(let k = 0; k < 2; k++){
+			document.getElementById("controller" + (k+1)).innerHTML = "Controller" + (k+1) + ": " + gamepadAPI.connected[k];
+
 			if (gamepadAPI.connected[k]){
 				//if controller has changed
 				if(gamepadAPI.updateBtn(k) || gamepadAPI.updateAxes(k)){
@@ -78,9 +63,28 @@ window.addEventListener('load', function() {
 //runs for every new gamepad
 window.addEventListener("gamepadconnected", function(e) {
   	gamepadAPI.addController(e);
-  	console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.",
-    e.gamepad.index, e.gamepad.id,
-    e.gamepad.buttons.length, e.gamepad.axes.length);
+  	alert("Gamepad connected at index " + e.gamepad.id + " buttons " + e.gamepad.buttons.length + " axes " + e.gamepad.axes.length);
+  	
+  	ws = new WebSocket(ipadress); //start new websocket
+
+	//when websocket opens
+	ws.onopen = function() {
+		console.log = ("Connected");
+		ws_status = true;
+
+
+		//send message every second
+		window.setInterval(function(){
+			ws.send("Message >:(");
+		},1000)
+	};
+
+	//when websocket recieves message
+	ws.onmessage = function(evt) {
+		message = String(evt.data);
+		alert(message);
+	};
+
   	
 });
 
