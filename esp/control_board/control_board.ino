@@ -17,7 +17,7 @@ void setup() {
 }
 
 void loop() {
-  if(millis() - timer > 750){
+  if(millis() - timer > 2000){
     timer = millis(); //reset timer
 
     Serial.println(controller1_data);

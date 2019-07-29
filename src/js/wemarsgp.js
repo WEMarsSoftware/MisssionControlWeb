@@ -27,95 +27,88 @@
 14 DPAD left
 15 DPAD right
 16 POWER
-
 */
 
-let gamepadAPI = {
-	
-	pad: [], //gamepad objects
-	connected: [], //status of all gamepads
-	padCounter: 0, //number of gamepads 
-
-	//new controller connected
-	addController: function(evt){
-		gamepadAPI.pad[gamepadAPI.padCounter] = new WeMarsGamePad(evt.gamepad); 
-		//alert("Controller #" + (gamepadAPI.padCounter + 1) + " id: " + gamepadAPI.pad[gamepadAPI.padCounter].controller.id);
-		gamepadAPI.connected[gamepadAPI.padCounter] = true; 
-		gamepadAPI.padCounter++;
-	},
-
-	//new controller removed
-	removeController: function(evt){
-		//loop through gamepads
-		for(let i = 0; i < gamepadAPI.pad.length; i++){
-			gp = gamepadAPI.pad[i]
-			if(evt.gamepad.id === gp.id){
-				gamepadAPI.connected[i] = false;
-				gamepadAPI.pad.splice(i,1); //remove gamepad
-				gamepadAPI.padCounter--; 
-			}
-		}
-	},
+//gamepad objects
+let gamepads = [];
+gamepads[0] = new WeMarsGamePad(0);
+gamepads[1] = new WeMarsGamePad(1);
 
 
-	updateBtn: function(n){
-		gamepadAPI.buttonsStatus = []; //empty cache
+function updateGP(){
+	let changed = false; //if gamepad status has changed
+	let gp = navigator.getGamepads();
 
-		let gp = gamepadAPI.pad[n];
-		let c = gamepadAPI.pad[n].controller; //for ease of reading
-		let changed = false; //if status has changed
+	//loop through all gamepads
+	for(let c = 0; c < gp.length; c++){
 
-		let map = 0; //current map of buttons
+		gamepads[c].connected = true;
+		let map = getBtnMap(gp[c]);
 
-		//loop through buttons
-		for(let i = 0; i < c.buttons.length; i++){
-			//if button i is pressed
-			if (c.buttons[i].pressed){
-				map |= (1 << i); //add status to map
-			}
-		}
-
-		//if map has changed
-		if (gp.btnMap !== map){
+		//if map is not the same
+		if (map !== gamepads[c].btnMap){
 			changed = true;
-			gp.btnMap = map; //reset map
+			gamepads[c].btnMap = map; //update map
 		}
-
-		return changed;
-	},
-
-	updateAxes: function(n){
-
-		let gp = gamepadAPI.pad[n];
-		let c = gamepadAPI.pad[n].controller; //for ease of reading
-		let changed = false; //if axes position has changed
 
 		//loop through axes
-		for(let i = 0; i < c.axes.length; i++){
+		for(let i = 0; i < gp[c].axes.length; i++){
+			let axis = deadzone(gp[c].axes[i]); //account for deadzone
+
 			//if axis has changed
-			if (c.axes[i] != gp.axes[i]){
+			if (axis !== gamepads[c].axes[i]){
 				changed = true; 
-				gp.axes[i] = c.axes[i];
+				gamepads[c].axes[i] = axis; //update axis
 			}
 		}
+	}
 
-		return changed;
-		
-	},
-	btnName: ["A","B","X","Y","LB","RB","LT","BACK","START","L AXIS","R AXIS","DPAD up", "DPAD down"]
-};
-
-//converts axis from float to integer
-function convertAxis(a){
-	return Math.trunc(a*1000);
+	return changed;
 }
 
-//construtor for gamepad
-function WeMarsGamePad(g){
-	this.controller = g; //gamepad object
-	this.btnMap = 0; //status of all buttons
-	this.axisStatus = []; //status of all axes
-	this.id = g.id; //id of gamepad
-	this.axes = []; //axes positions
+function getBtnMap(gp){
+	let map = 0;
+	
+	for(let i = 0; i < gp.buttons.length; i++){
+		//if button i is pressed
+		if (gp.buttons[i].pressed){
+			map |= (1 << i); //add status to map
+		}
+	}
 
+	return map;
+}
+
+//elimiates deadzone in axis
+function deadzone(v) {
+		const DEADZONE = 0.2;
+
+		if (Math.abs(v) < DEADZONE) {
+			v = 0;
+		} else {
+			// Smooth
+			v = v - Math.sign(v) * DEADZONE;
+			v /= (1.0 - DEADZONE);
+		}
+
+		return v;
+	}
+
+//construtor for gamepad
+function WeMarsGamePad(n){
+	this.btnMap = 0; //status of all buttons
+	this.axes = [0,0,0,0]; //axes positions
+	this.connected = false;
+	this.id = n;
+
+	this.message = function(){
+		let m = (this.id) + "," + this.btnMap;
+
+		//loop through axes
+		for(let i = 0; i < this.axes.length; i++){
+			m += ("," + Math.trunc(this.axes[i]*1000));
+		}
+
+		return m;
+	};
 }

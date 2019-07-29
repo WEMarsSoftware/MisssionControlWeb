@@ -7,11 +7,13 @@
 #include "SPIFFS.h"
 
 // INFO FOR LOCAL ROUTER
-const char* ssid = "NETGEAR83";
-const char* password = "newunit583";
+const char* ssid = "WE MARS Rover";
+const char* password = "westill1";
 
-char* controller1_data = "1,0,0,0,0";
-char* controller2_data = "2,0,0,0,0";
+String controller1_data = "0,0,0,0,0";
+String controller2_data = "1,0,0,0,0";
+
+
 
 // COMMUNICATION CONSTANTS
 AsyncWebServer server(80);
@@ -31,20 +33,27 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
     Serial.println("Client disconnected");
     globalClient = NULL; //to avoid errors
   }
-
-  //if the websocket sents data
+  //if data has been recieved
   else if(type == WS_EVT_DATA){
-    char* tempData = "";
+    bool flag = true;
+    char temp[len];
+    
+    //translate data into string
     for(int i=0; i < len; i++) {
-        tempData += (char)data[i];
+       if('_' != (char)data[i] && flag){
+          temp[i] = (char)data[i];  
+       }
+       else if (flag){
+          flag = false;
+          temp[i] = '_';
+       }
+       else{
+          temp[i] = '_'; 
+       }
     }
 
-    if(data[0] == 1){
-      controller1_data = tempData;
-    }
-    else{
-      controller2_data = tempData;
-    }
+    
+    controller1_data = temp; //save controller data
   }
 }
 
@@ -53,13 +62,16 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
 void inline startWiFi()
 {  
     WiFi.begin(ssid, password);
+
+    Serial.print("Connecting to WiFi...");
     while (WiFi.status() != WL_CONNECTED) {
       delay(500);
-      Serial.println("Connecting to WiFi..");
-      Serial.println("CONNECTED TO " + String(ssid));
-      Serial.println(WiFi.localIP());
-      Serial.println(WiFi.macAddress());
+      Serial.print(".");
     }
+    Serial.println();
+    Serial.println("CONNECTED TO " + String(ssid));
+    Serial.println(WiFi.localIP());
+    Serial.println(WiFi.macAddress());
 }
 
 //starts server
