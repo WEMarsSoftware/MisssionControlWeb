@@ -63,6 +63,9 @@ window.addEventListener('load', function() {
 //runs for every new gamepad
 window.addEventListener("gamepadconnected", function(e) {
   	gamepadAPI.addController(e);
+
+  	console.log("FRICK");
+
   	alert("Gamepad connected at index " + e.gamepad.id + " buttons " + e.gamepad.buttons.length + " axes " + e.gamepad.axes.length);
   	
   	ws = new WebSocket(ipadress); //start new websocket
