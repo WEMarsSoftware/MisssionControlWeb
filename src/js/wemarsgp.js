@@ -109,6 +109,8 @@ function WeMarsGamePad(n){
 			m += ("," + Math.trunc(this.axes[i]*1000));
 		}
 
+		m += "_"
+
 		return m;
 	};
 }

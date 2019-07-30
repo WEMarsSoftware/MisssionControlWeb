@@ -6,7 +6,7 @@
  July 28/2019
 */
 
-let ipadress = "ws://192.168.1.4/ws";
+let ipadress = "ws://192.168.1.100/ws";
 let ws = new WebSocket(ipadress);
 let ws_cnt = false; //websocket connected
 
@@ -30,10 +30,17 @@ window.addEventListener('load', function() {
 	window.setInterval(function(){
 		//if the staus of the controller has changed
 		if(updateGP()){
+			
+			let a = Math.trunc(gamepads[0].axes[0]*100);
+			let b = Math.trunc(gamepads[0].axes[1]*50 + 50);
+
 			//if websocket is connected
 			if(ws_cnt){
-				ws.send(gamepads[0].message()); //send controller data to esp32
+				//ws.send(gamepads[0].message()); //send controller data to esp32
+				ws.send(a + "," + b);
 			}
+			
+			console.log(a + "," + b);
 
 
 			let id = "";
@@ -62,3 +69,4 @@ window.addEventListener('load', function() {
 	},300);
 
 });
+
