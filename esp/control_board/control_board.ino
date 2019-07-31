@@ -20,7 +20,7 @@ void loop() {
   if(millis() - timer > 2000){
     timer = millis(); //reset timer
 
-    Serial.println(controller1_data);
+    //Serial.println(controller1_data);
 
     //blink LED
     if(LED_status){

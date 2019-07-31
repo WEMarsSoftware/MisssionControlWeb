@@ -10,8 +10,10 @@
 const char* ssid = "WE MARS Rover";
 const char* password = "westill1";
 
-String controller1_data = "0,0,0,0,0";
-String controller2_data = "1,0,0,0,0";
+//  BUTTON AND AXIS STATUS 
+//  button map, L AXIS x, L AXIS y, R AXIS x, R AXIS y
+int[] controller1 = {0,0,0,0};
+int[] controller2 = {0,0,0,0};
 
 
 
@@ -35,11 +37,60 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
   }
   //if data has been recieved
   else if(type == WS_EVT_DATA){
-    bool flag = true;
-    char temp[len];
+    //bool flag = true;
+    //char temp[len];
+
+    bool idFound = false; //if the id of the controller has been parsed
+    byte id; 
+    byte indexCounter = 0; 
+    byte digitCounter = 5; //start at 5 for math to work
+    int[4] temp;
+
+    //reset controller data
+    for(int j = 0; j < controller1.length; j++){
+      if(id == 0){
+        controller1[j] = 0;
+      }
+      else{
+        controller2[j] = 0;
+      }
+    }
     
-    //translate data into string
     for(int i=0; i < len; i++) {
+
+      if (!idFound){
+        id = toInt((char)data[i]);
+        idFound = true;
+      }
+      else{
+        if(',' == (char)data[i]){
+          //adjust for extra zeros
+          if(id == 0){
+            controller1[indexCounter] /= 10*digitCounter;
+          }
+          else{
+            controller2[indexCounter] /= 10*digitCounter;
+          }
+          
+          digitCounter = 5; //reset counter
+          indexCounter++; //next number
+        }
+        else if ('_' == (char)data[i]){
+          break; //end loop
+        }
+        else{
+          if(id == 0){
+            controller1[indexCounter] += 10*digitCounter*toInt((char)data[i]);
+          }
+          else{
+            controller2[indexCounter] += 10*digitCounter*toInt((char)data[i]);
+          }
+          digitCounter--;
+        }
+      }
+
+      /*
+      //translate data into string
        if('_' != (char)data[i] && flag){
           temp[i] = (char)data[i];  
        }
@@ -50,10 +101,8 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
        else{
           temp[i] = '_'; 
        }
+       */
     }
-
-    
-    controller1_data = temp; //save controller data
   }
 }
 
