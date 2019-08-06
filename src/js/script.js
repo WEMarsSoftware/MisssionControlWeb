@@ -6,28 +6,37 @@
  July 28/2019
 */
 
-let ipadress = "ws://192.168.1.100/ws";
-let ws = new WebSocket(ipadress);
-let ws_cnt = false; //websocket connected
+let ws_control = new WebSocket("ws://192.168.1.100/ws"); //websocket for controller
+let ws_nav = new WebSocket("ws:// /ws "); //websocket for navigation
+
+let ws_cnt_control = false; //controler websocket connected
+let ws_cnt_nav = false; //navigation websocket connected
+
+//slider values
+let xvalue = 0;
+let yvalue = 0;
+
 
 //when websocket opens
-ws.onopen = function() {
+ws_control.onopen = function() {
 	alert("Connected");
 	ws_cnt = true;
 };
 
 //when websocket recieves message
-ws.onmessage = function(evt) {
+ws_control.onmessage = function(evt) {
 	let message = String(evt.data);
 	alert(message);
 };
 
-//TODO: add websocket disconnect
 
 //runs when webpage is fully loaded
 window.addEventListener('load', function() {
 	//standard update
 	window.setInterval(function(){
+
+		updateSliders();
+
 		//if the staus of the controller has changed
 		if(updateGP()){
 			
@@ -37,7 +46,7 @@ window.addEventListener('load', function() {
 			//if websocket is connected
 			if(ws_cnt){
 				//ws.send(gamepads[0].message()); //send controller data to esp32
-				ws.send(a + "," + b);
+				ws_control.send(a + "," + b);
 			}
 			
 			console.log(a + "," + b);
@@ -59,7 +68,7 @@ window.addEventListener('load', function() {
 
 		//if websocket is connected
 		if(ws_cnt){
-			ws.send(gamepads[0].message()); //send controller data to esp32
+			ws_control.send(gamepads[0].message()); //send controller data to esp32
 		}
 
 		document.getElementById("controller1").innerHTML = "Gamepad 1: " + gamepads[0].connected + " - " + gamepads[0].message();
@@ -69,4 +78,24 @@ window.addEventListener('load', function() {
 	},300);
 
 });
+
+function updateSliders(){
+	//get values of sliders
+	let xvalue_temp = document.getElementById("xslider");
+	let yvalue_temp = document.getElementById("xslider");
+	
+	//if slider values have changed
+	if(xvalue_temp != xvalue || yvalue_temp != yvalue){
+		//update webpage and values
+		document.getElementById("xslider_value") = xvalue.value;
+		document.getElementById("xslider_value") = xvalue.value;
+		xvalue = xvalue_temp;
+		yvalue = yvalue_temp;
+
+		if(ws_cnt_nav){
+			ws_nav.send(String(xvalue) + "," + String(yvalue) + "_");
+		}
+
+	}
+}
 

@@ -12,8 +12,8 @@ const char* password = "westill1";
 
 //  BUTTON AND AXIS STATUS 
 //  button map, L AXIS x, L AXIS y, R AXIS x, R AXIS y
-int[] controller1 = {0,0,0,0};
-int[] controller2 = {0,0,0,0};
+int controller1[] = {0,0,0,0};
+int controller2[] = {0,0,0,0};
 
 
 
@@ -44,10 +44,11 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
     byte id; 
     byte indexCounter = 0; 
     byte digitCounter = 5; //start at 5 for math to work
-    int[4] temp;
+    String strTemp;
+    int temp[4];
 
     //reset controller data
-    for(int j = 0; j < controller1.length; j++){
+    for(int j = 0; j < 4; j++){
       if(id == 0){
         controller1[j] = 0;
       }
@@ -59,7 +60,8 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
     for(int i=0; i < len; i++) {
 
       if (!idFound){
-        id = toInt((char)data[i]);
+        String temp = String((char)data[i]);
+        id = temp.toInt();
         idFound = true;
       }
       else{
@@ -79,11 +81,12 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
           break; //end loop
         }
         else{
+          String temp = String((char)data[i]);
           if(id == 0){
-            controller1[indexCounter] += 10*digitCounter*toInt((char)data[i]);
+            controller1[indexCounter] += 10*temp.toInt();
           }
           else{
-            controller2[indexCounter] += 10*digitCounter*toInt((char)data[i]);
+            controller2[indexCounter] += 10*digitCounter*temp.toInt();
           }
           digitCounter--;
         }
