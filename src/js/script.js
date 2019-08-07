@@ -3,11 +3,11 @@
  Main script for missioncontrol webpage
  
  Kyle Inzunza
- July 28/2019
+ August 07/2019
 */
 
 let ws_control = new WebSocket("ws://192.168.1.100/ws"); //websocket for controller
-let ws_nav = new WebSocket("ws:// /ws "); //websocket for navigation
+let ws_nav = new WebSocket("ws://192.168.1.100/ws"); //websocket for navigation
 
 let ws_cnt_control = false; //controler websocket connected
 let ws_cnt_nav = false; //navigation websocket connected
@@ -20,7 +20,7 @@ let yvalue = 0;
 //when websocket opens
 ws_control.onopen = function() {
 	alert("Connected");
-	ws_cnt = true;
+	ws_cnt_control = true;
 };
 
 //when websocket recieves message
@@ -43,8 +43,8 @@ window.addEventListener('load', function() {
 			let a = Math.trunc(gamepads[0].axes[0]*100);
 			let b = Math.trunc(gamepads[0].axes[1]*50 + 50);
 
-			//if websocket is connected
-			if(ws_cnt){
+			//if control websocket is connected
+			if(ws_cnt_control){
 				//ws.send(gamepads[0].message()); //send controller data to esp32
 				ws_control.send(a + "," + b);
 			}
@@ -67,7 +67,7 @@ window.addEventListener('load', function() {
 		updateGP();
 
 		//if websocket is connected
-		if(ws_cnt){
+		if(ws_cnt_control){
 			ws_control.send(gamepads[0].message()); //send controller data to esp32
 		}
 
@@ -79,16 +79,26 @@ window.addEventListener('load', function() {
 
 });
 
+//updates navigation values on webpage
+function updateWebNav(){
+	document.getElementById("pitch").innerHTML = pitch;
+	document.getElementById("roll").innerHTML = roll;
+	document.getElementById("compass").innerHTML = bearing;
+	document.getElementById("lat").innerHTML = latitude;
+	document.getElementById("long").innerHTML = longtitude;
+}
+
+//updates slider values and sends over websocket
 function updateSliders(){
 	//get values of sliders
 	let xvalue_temp = document.getElementById("xslider");
-	let yvalue_temp = document.getElementById("xslider");
+	let yvalue_temp = document.getElementById("yslider");
 	
 	//if slider values have changed
-	if(xvalue_temp != xvalue || yvalue_temp != yvalue){
+	if(xvalue_temp.value != xvalue || yvalue_temp.value != yvalue){
 		//update webpage and values
-		document.getElementById("xslider_value") = xvalue.value;
-		document.getElementById("xslider_value") = xvalue.value;
+		document.getElementById("xslider_value").innerHTML = "XSLIDER: " + xvalue_temp.value;
+		document.getElementById("yslider_value").innerHTML = "YSLIDER: " + yvalue_temp.value;
 		xvalue = xvalue_temp;
 		yvalue = yvalue_temp;
 
