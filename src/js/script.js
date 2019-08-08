@@ -19,14 +19,24 @@ let yvalue = 0;
 
 //when websocket opens
 ws_control.onopen = function() {
-	alert("Connected");
+	alert("Control board connected.");
 	ws_cnt_control = true;
+};
+
+ws_nav.onopen = function() {
+	alert("Navigation board connected.");
+	ws_cnt_nav = true;
 };
 
 //when websocket recieves message
 ws_control.onmessage = function(evt) {
 	let message = String(evt.data);
 	alert(message);
+};
+
+ws_nav.onmessage = function(evt) {
+	let message = String(evt.data);
+	updateNav(message);
 };
 
 
@@ -106,6 +116,21 @@ function updateSliders(){
 			ws_nav.send(String(xvalue) + "," + String(yvalue) + "_");
 		}
 
+	}
+}
+
+//send 360 servo data
+function updateServo3(){
+	let leftBtn = document.getElementById("left");
+	let rightBtn = document.getElementById("right");
+
+	if (ws_cnt_nav){
+		if(leftBtn.clicked){
+			ws_nav.send("l");
+		}
+		else if(rightBtn.clicked){
+			ws_nav.send("r");
+		}
 	}
 }
 
