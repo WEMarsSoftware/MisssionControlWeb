@@ -106,7 +106,7 @@ function WeMarsGamePad(n){
 
 		//loop through axes
 		for(let i = 0; i < this.axes.length; i++){
-			m += ("," + Math.trunc(this.axes[i]*1000));
+			m += ("," + Math.trunc(this.axes[i]*32767)); //set to max size of arduino integer
 		}
 
 		m += "_"

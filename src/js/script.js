@@ -7,15 +7,24 @@
 */
 
 let ws_control = new WebSocket("ws://192.168.1.100/ws"); //websocket for controller
-let ws_nav = new WebSocket("ws://192.168.1.100/ws"); //websocket for navigation
+let ws_nav = new WebSocket("ws://192.168.1.101/ws"); //websocket for navigation
+let ws_arm = new WebSocket("ws://192.168.1.102/ws");
+
+
 
 let ws_cnt_control = false; //controler websocket connected
 let ws_cnt_nav = false; //navigation websocket connected
+let ws_cnt_arm = false;
 
 //slider values
 let xvalue = 0;
 let yvalue = 0;
 
+
+ws_arm.onopen = function(){
+	alert("Arm board connnected");
+	ws_cnt_arm = true;
+}
 
 //when websocket opens
 ws_control.onopen = function() {
@@ -36,8 +45,14 @@ ws_control.onmessage = function(evt) {
 
 ws_nav.onmessage = function(evt) {
 	let message = String(evt.data);
+	//alert(message);
 	updateNav(message);
 };
+
+ws_arm.onopen = function(){
+	alert("Arm board connected.");
+	ws_cnt_arm = true;
+}
 
 
 //runs when webpage is fully loaded
@@ -46,21 +61,24 @@ window.addEventListener('load', function() {
 	window.setInterval(function(){
 
 		updateSliders();
+		//updateServo3();
+
 
 		//if the staus of the controller has changed
 		if(updateGP()){
 			
-			let a = Math.trunc(gamepads[0].axes[0]*100);
-			let b = Math.trunc(gamepads[0].axes[1]*50 + 50);
+			//let a = Math.trunc(gamepads[0].axes[0]*100);
+			//et b = Math.trunc(gamepads[0].axes[1]*50 + 50);
 
 			//if control websocket is connected
 			if(ws_cnt_control){
-				//ws.send(gamepads[0].message()); //send controller data to esp32
-				ws_control.send(a + "," + b);
+				ws_control.send(gamepads[0].message()); //send controller data to esp32
+				//ws_control.send(gamepads[0].message());
+			}
+			if(ws_cnt_arm){
+				ws_arm.send(gamepads[1].message());
 			}
 			
-			console.log(a + "," + b);
-
 
 			let id = "";
 			for (let i = 0; i < 4; i++){
@@ -74,11 +92,15 @@ window.addEventListener('load', function() {
 	//ping update
 	window.setInterval(function(){
 		//update controller status
+		updateWebNav();
 		updateGP();
 
 		//if websocket is connected
 		if(ws_cnt_control){
 			ws_control.send(gamepads[0].message()); //send controller data to esp32
+		}
+		if(ws_cnt_arm){
+			ws_control.send(gamepads[1].message());
 		}
 
 		document.getElementById("controller1").innerHTML = "Gamepad 1: " + gamepads[0].connected + " - " + gamepads[0].message();
@@ -91,11 +113,11 @@ window.addEventListener('load', function() {
 
 //updates navigation values on webpage
 function updateWebNav(){
-	document.getElementById("pitch").innerHTML = pitch;
-	document.getElementById("roll").innerHTML = roll;
-	document.getElementById("compass").innerHTML = bearing;
-	document.getElementById("lat").innerHTML = latitude;
-	document.getElementById("long").innerHTML = longtitude;
+	document.getElementById("pitch").innerHTML = "Pitch: " + pitch;
+	document.getElementById("roll").innerHTML = "Roll: " + roll;
+	document.getElementById("compass").innerHTML = "Compass bearing: " + bearing;
+	document.getElementById("lat").innerHTML = "Latitude: " + latitude;
+	document.getElementById("long").innerHTML = "Longitude " + longitude;
 }
 
 //updates slider values and sends over websocket
@@ -109,11 +131,11 @@ function updateSliders(){
 		//update webpage and values
 		document.getElementById("xslider_value").innerHTML = "XSLIDER: " + xvalue_temp.value;
 		document.getElementById("yslider_value").innerHTML = "YSLIDER: " + yvalue_temp.value;
-		xvalue = xvalue_temp;
-		yvalue = yvalue_temp;
+		xvalue = xvalue_temp.value;
+		yvalue = yvalue_temp.value;
 
 		if(ws_cnt_nav){
-			ws_nav.send(String(xvalue) + "," + String(yvalue) + "_");
+			ws_nav.send(xvalue + "," + yvalue + "_");
 		}
 
 	}
@@ -126,6 +148,7 @@ function updateServo3(){
 
 	if (ws_cnt_nav){
 		if(leftBtn.clicked){
+			alert("CLICKED");
 			ws_nav.send("l");
 		}
 		else if(rightBtn.clicked){
